@@ -90,4 +90,17 @@ public class ShoppingCartResource {
             return Response.status(Response.Status.OK).entity(null).build();
         }
     }
+
+    @POST()
+    @Path("shoppingCart")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getShoppingCart(ShoppingCart shoppingCart) {
+        try {
+            return Response.status(Response.Status.OK).entity(shoppingCartJpaRepository.save(shoppingCart)).build();
+        }
+        catch (Exception e) {
+            System.err.println("Exception message: " + e.getMessage());
+            return Response.status(Response.Status.OK).entity(null).build();
+        }
+    }
 }
