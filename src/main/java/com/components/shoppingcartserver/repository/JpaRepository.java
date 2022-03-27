@@ -4,6 +4,8 @@ import com.components.shoppingcartserver.annotations.Column;
 import com.components.shoppingcartserver.annotations.Entity;
 import com.components.shoppingcartserver.annotations.Id;
 import com.components.shoppingcartserver.config.DatabaseConnection;
+import com.components.shoppingcartserver.entities.CartItem;
+import com.components.shoppingcartserver.entities.dto.CartItemDTO;
 import com.components.shoppingcartserver.exception.EntityException;
 import com.components.shoppingcartserver.utils.ConvertHelper;
 import com.components.shoppingcartserver.utils.SQLConstant;
@@ -51,7 +53,7 @@ public class JpaRepository<T> {
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.FROM);
             stringCmd.append(SQLConstant.SPACE);
-            stringCmd.append(tableName);
+            stringCmd.append("`"+tableName+"`");
             //execute command
             PreparedStatement preparedStatement = connection.prepareStatement(stringCmd.toString());
             System.out.println(stringCmd.toString());
@@ -85,7 +87,7 @@ public class JpaRepository<T> {
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.FROM);
             stringCmd.append(SQLConstant.SPACE);
-            stringCmd.append(tableName);
+            stringCmd.append("`"+tableName+"`");
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.WHERE);
             //id information
@@ -152,7 +154,7 @@ public class JpaRepository<T> {
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.FROM);
             stringCmd.append(SQLConstant.SPACE);
-            stringCmd.append(tableName);
+            stringCmd.append("`"+tableName+"`");
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.WHERE);
             //id information
@@ -212,7 +214,7 @@ public class JpaRepository<T> {
             StringBuilder stringCmd = new StringBuilder();
             stringCmd.append(SQLConstant.INSERT_INTO);
             stringCmd.append(SQLConstant.SPACE);
-            stringCmd.append(currentEntity.tableName());
+            stringCmd.append("`"+currentEntity.tableName()+"`");
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.OPEN_PARENTHESES);
             Field[] fields = clazz.getDeclaredFields();
@@ -314,7 +316,7 @@ public class JpaRepository<T> {
             StringBuilder stringCmd = new StringBuilder();
             stringCmd.append(SQLConstant.UPDATE);
             stringCmd.append(SQLConstant.SPACE);
-            stringCmd.append(tableName);
+            stringCmd.append("`"+tableName+"`");
             stringCmd.append(SQLConstant.SPACE);
             stringCmd.append(SQLConstant.SET);
             stringCmd.append(SQLConstant.SPACE);
@@ -433,4 +435,65 @@ public class JpaRepository<T> {
         }
         return listObj;
     }
+
+    public List<CartItemDTO> getListCartItem() {
+        List<CartItemDTO> cartItems = new ArrayList<>();
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            StringBuilder stringCmd = new StringBuilder();
+            stringCmd.append("SELECT ci.id, ci.user_id, ci.product_id, ci.price, ci.quantity, p.name AS product_name, p.image AS product_image\n" +
+                    "FROM `cart-item` ci\n" +
+                    "INNER JOIN product p \n" +
+                    "ON ci.product_id = p.id;\n");
+            //execute command
+            PreparedStatement preparedStatement = connection.prepareStatement(stringCmd.toString());
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int user_id = rs.getInt("user_id");
+                int product_id = rs.getInt("product_id");
+                String product_name = rs.getString("product_name");
+                String product_image = rs.getString("product_image");
+                double price = rs.getDouble("price");
+                int quantity = rs.getInt("quantity");
+
+                cartItems.add(new CartItemDTO(id, user_id, product_id, product_name, product_image, price, quantity));
+            }
+
+        }catch (Exception error) {
+            System.err.printf("Find all error %s\n", error.getMessage());
+            error.printStackTrace();
+        }
+        return cartItems;
+    }
+
+    public List<CartItem> checkCartItem(int idProduct) {
+        List<CartItem> cartItems = new ArrayList<>();
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            StringBuilder stringCmd = new StringBuilder();
+            stringCmd.append("SELECT * FROM `cart-item` WHERE product_id = " + idProduct);
+            //execute command
+            PreparedStatement preparedStatement = connection.prepareStatement(stringCmd.toString());
+            System.out.println(preparedStatement);
+            ResultSet rs = preparedStatement.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                int user_id = rs.getInt("user_id");
+                int product_id = rs.getInt("product_id");
+                double price = rs.getDouble("price");
+                int quantity = rs.getInt("quantity");
+
+                cartItems.add(new CartItem(id, user_id, product_id, price, quantity));
+            }
+
+        }catch (Exception error) {
+            System.err.printf("Find all error %s\n", error.getMessage());
+            error.printStackTrace();
+        }
+        return cartItems;
+    }
 }
+
+

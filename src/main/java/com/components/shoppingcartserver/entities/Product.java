@@ -14,6 +14,8 @@ public class Product {
     private int id;
     @Column(columnName = "name", columnType = SQLDataTypes.VARCHAR255)
     private String name;
+    @Column(columnName = "image", columnType = SQLDataTypes.VARCHAR255)
+    private String image;
     @Column(columnName = "price", columnType = SQLDataTypes.DOUBLE)
     private double price;
     @Column(columnName = "status", columnType = SQLDataTypes.INTEGER)
@@ -22,9 +24,10 @@ public class Product {
     public Product() {
     }
 
-    public Product(int id, String name, double price, int status) {
+    public Product(int id, String name, String image, double price, int status) {
         this.id = id;
         this.name = name;
+        this.image = image;
         this.price = price;
         this.status = status;
     }
@@ -43,6 +46,14 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public double getPrice() {
